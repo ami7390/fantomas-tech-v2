@@ -1,11 +1,13 @@
 "use client";
-import {useMemo,useState} from "react";
+import {useEffect,useMemo,useState} from "react";
 import SiteHeader from "../components/SiteHeader";
 import SiteFooter from "../components/SiteFooter";
 import {ArrowRight,BarChart3,Plus,Search,SlidersHorizontal,Zap} from "lucide-react";
+import {getProducts} from "../../lib/supabase";
 
 const root="https://www.fantomas.tech";
-const products=[
+type ProductTuple=[string,string,string,number,string,string];
+const fallbackProducts:ProductTuple[]=[
  ["tripod-professional","TRIPOD PROFESSIONAL","PERCHE A SELFIE",10000,"/api/product-images/143","Disponible"],
  ["drone-m3-max","DRONE M3 MAX","Drones",28000,"/api/product-images/134","Disponible"],
  ["amplificateur-ecran-10-pouces","AMPLIFICATEUR 10\"","Électrique",4500,"/api/product-images/132","Disponible"],
@@ -53,14 +55,16 @@ const products=[
  ["mini-led-fill-light","LED FILL LIGHT","Éclairage",6000,"/api/product-images/54","Disponible"],
  ["mini-led-light","LED VIDEO LIGHT","Éclairage",5000,"/api/product-images/50","Stock limité"],
  ["disque-rotatif","DISQUE ROTATIF","Informatique",15000,"/api/product-images/46","Disponible"],
-] as const;
-const categories=["Tous",...Array.from(new Set(products.map(p=>p[2])))];
+];
 const money=(n:number)=>new Intl.NumberFormat("fr-FR").format(n)+" XOF";
 
 export default function Boutique(){
+ const [products,setProducts]=useState<ProductTuple[]>(fallbackProducts);
  const [category,setCategory]=useState("Tous"),[query,setQuery]=useState(""),[sort,setSort]=useState("featured"),[limit,setLimit]=useState(16);
  const [compareA,setCompareA]=useState("hy300-pro-4k"),[compareB,setCompareB]=useState("hy320-mini-4k");
  const [devices,setDevices]=useState<string[]>(["Télévision & box internet"]);
+ useEffect(()=>{getProducts().then(rows=>{if(rows.length)setProducts(rows.map(p=>[p.slug,p.name,p.category,p.price,p.image_url,p.availability]))}).catch(()=>{})},[]);
+ const categories=["Tous",...Array.from(new Set(products.map(p=>p[2])))];
  const shown=useMemo(()=>{let list=products.filter(p=>(category==="Tous"||p[2]===category)&&p[1].toLowerCase().includes(query.toLowerCase()));if(sort==="low")list=[...list].sort((a,b)=>a[3]-b[3]);if(sort==="high")list=[...list].sort((a,b)=>b[3]-a[3]);return list},[category,query,sort]);
  const compared=[products.find(p=>p[0]===compareA)!,products.find(p=>p[0]===compareB)!];
  const deviceOptions=["Réfrigérateur / congélateur","Télévision & box internet","Climatiseur 1 CV","Éclairage maison","Ordinateurs & bureau"];

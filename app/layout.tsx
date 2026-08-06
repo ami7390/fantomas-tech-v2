@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
+import Tracking from "./components/Tracking";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -36,6 +37,7 @@ export default function RootLayout({
         className={`${inter.variable} ${mono.variable} ${jakarta.variable} antialiased`}
       >
         {children}
+        <Tracking/>
       </body>
     </html>
   );

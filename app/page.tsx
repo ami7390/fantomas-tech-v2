@@ -5,8 +5,10 @@ import SiteHeader from "./components/SiteHeader";
 import SiteFooter from "./components/SiteFooter";
 import {ArrowRight,CheckCircle2,ChevronDown,ChevronLeft,ChevronRight,CircleCheck,Eye,Headphones,Laptop,MessageCircle,Send,Shield,ShieldCheck,SlidersHorizontal,Sparkles,Truck,X,Zap} from "lucide-react";
 import {UiCard,UiIcon} from "./components/ui/Primitives";
+import {getProducts} from "../lib/supabase";
 
-const products = [
+type HomeProduct={id:number;name:string;category:string;price:number;spec:string;image:string;status:string;badge?:string};
+const defaultProducts:HomeProduct[] = [
   { id:1, name:"PROJECTEUR HY300 PRO 4K", category:"Maison intelligente", price:60000, spec:"Cinéma portable • Wi‑Fi • Android", image:"/assets/fantomas-original/hy300.webp", status:"En stock", badge:"Produit vedette" },
   { id:2, name:"PROJECTEUR HY320 MINI 4K", category:"Maison intelligente", price:60000, spec:"Compact • Rotatif • Compatible 4K", image:"/assets/fantomas-original/hy320.webp", status:"En stock" },
   { id:3, name:"CAMERA DE SURVEILLANCE INDOOR", category:"Sécurité", price:20000, spec:"Surveillance intérieure connectée", image:"/assets/fantomas-original/camera-indoor.webp", status:"En stock" },
@@ -21,13 +23,14 @@ const filters = ["Tous","Sécurité","Énergie","Informatique","Maison intellige
 const money = (n:number) => new Intl.NumberFormat("fr-FR").format(n)+" XOF";
 
 export default function Home(){
+  const [products,setProducts]=useState(defaultProducts);
   const [filter,setFilter]=useState("Tous");
   const [query,setQuery]=useState("");
   const [selected,setSelected]=useState<number[]>([]);
   const [config,setConfig]=useState({type:"",space:"",priority:""});
   const [step,setStep]=useState(1);
   const [faqOpen,setFaqOpen]=useState(0);
-  const [quickView,setQuickView]=useState<(typeof products)[number]|null>(null);
+  const [quickView,setQuickView]=useState<(typeof defaultProducts)[number]|null>(null);
   const [featuredIndex,setFeaturedIndex]=useState(0);
   const [sliderPaused,setSliderPaused]=useState(false);
   const touchStart=useRef<number|null>(null);
@@ -42,6 +45,7 @@ export default function Home(){
   const nextFeatured=()=>setFeaturedIndex(i=>(i+1)%featured.length);
   const prevFeatured=()=>setFeaturedIndex(i=>(i-1+featured.length)%featured.length);
   useEffect(()=>{if(sliderPaused)return;const timer=window.setInterval(nextFeatured,6000);return()=>window.clearInterval(timer)},[sliderPaused]);
+  useEffect(()=>{getProducts().then(rows=>{if(rows.length)setProducts(rows.slice(0,8).map((p,i)=>({id:i+1,name:p.name,category:p.category,price:p.price,spec:p.description||"Produit Fantomas Tech",image:p.image_url,status:p.availability,badge:p.featured?"Produit vedette":undefined}))) }).catch(()=>{})},[]);
 
   return <main id="top">
     <div className="ambient a1"/><div className="ambient a2"/>
