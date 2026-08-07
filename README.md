@@ -1,5 +1,13 @@
 # Fantomas Tech — version Vercel
 
+## Produits, images et messages Supabase
+
+1. Exécutez `supabase/migrations/001_products.sql`, puis `supabase/migrations/002_contact_messages.sql` dans l’éditeur SQL de Supabase.
+2. Dans `/admin`, choisissez une catégorie existante ou saisissez-en une nouvelle. L’image locale est envoyée vers le bucket `product-images`.
+3. La page `/contact` enregistre les demandes dans Supabase. Elles apparaissent dans l’onglet Messages de `/admin`.
+
+Configurez `NEXT_PUBLIC_SUPABASE_URL` et `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` dans Vercel. N’utilisez jamais une clé `service_role` dans une variable publique.
+
 Archive complète du site Fantomas Tech, préparée pour Next.js et Vercel.
 
 ## Installation locale
