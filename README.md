@@ -6,6 +6,12 @@
 2. Dans `/admin`, choisissez une catégorie existante ou saisissez-en une nouvelle. L’image locale est envoyée vers le bucket `product-images`.
 3. La page `/contact` enregistre les demandes dans Supabase. Elles apparaissent dans l’onglet Messages de `/admin`.
 
+## Fiches produits et mobile
+
+- Chaque bouton `+` de la boutique ouvre maintenant `/boutique/[slug]` avec la description, les avantages, les usages, les informations essentielles et les actions panier/WhatsApp.
+- Les fiches lisent les informations depuis Supabase et complètent automatiquement les descriptions trop courtes selon la catégorie.
+- L’interface mobile utilise des cartes compactes, des zones tactiles plus grandes, un menu plus lisible et un Hero optimisé pour améliorer le LCP.
+
 Configurez `NEXT_PUBLIC_SUPABASE_URL` et `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` dans Vercel. N’utilisez jamais une clé `service_role` dans une variable publique.
 
 Archive complète du site Fantomas Tech, préparée pour Next.js et Vercel.

@@ -1,0 +1,20 @@
+import type {Metadata} from "next";
+import Link from "next/link";
+import {notFound} from "next/navigation";
+import {ArrowLeft,CheckCircle2,ChevronRight,PackageCheck,ShieldCheck,Truck} from "lucide-react";
+import SiteHeader from "../../components/SiteHeader";
+import SiteFooter from "../../components/SiteFooter";
+import {getProductBySlug} from "../../../lib/supabase";
+import {initialProducts} from "../../../lib/initial-products";
+import {productContent} from "../../../lib/product-content";
+import AddProductActions from "./AddProductActions";
+
+const money=(n:number)=>new Intl.NumberFormat("fr-FR").format(n)+" XOF";
+const slugify=(value:string)=>value.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/(^-|-$)/g,"");
+async function resolveProduct(slug:string){try{const remote=await getProductBySlug(slug);if(remote)return remote}catch{}return initialProducts.find(p=>p.slug===slug||slugify(p.name)===slug)||null}
+export async function generateMetadata({params}:{params:Promise<{slug:string}>}):Promise<Metadata>{const {slug}=await params;const product=await resolveProduct(slug);return product?{title:`${product.name} | Fantomas Tech`,description:productContent(product).description}:{title:"Produit introuvable | Fantomas Tech"}}
+
+export default async function ProductPage({params}:{params:Promise<{slug:string}>}){
+ const {slug}=await params;const product=await resolveProduct(slug);if(!product)notFound();const content=productContent(product);
+ return <main className="pdp-page"><SiteHeader/><div className="pdp-breadcrumb"><Link href="/boutique"><ArrowLeft/>Boutique</Link><ChevronRight/><span>{product.category}</span><ChevronRight/><b>{product.name}</b></div><section className="pdp-hero"><div className="pdp-gallery"><span>{product.availability}</span><img src={product.image_url} alt={product.name}/><small>Visuel du produit • Les accessoires visibles peuvent varier selon le modèle disponible.</small></div><div className="pdp-summary"><p>{product.category} • FANTOMAS TECH</p><h1>{product.name}</h1><div className="pdp-status"><i/><span>{product.availability}</span><small>Stock à confirmer avant déplacement</small></div><strong>{money(product.price)}</strong><p className="pdp-description">{content.description}</p><AddProductActions product={product}/><div className="pdp-reassurance"><span><Truck/><b>Livraison à Bamako</b><small>Délai confirmé selon votre quartier</small></span><span><ShieldCheck/><b>Conditions clarifiées</b><small>Garantie précisée avant validation</small></span><span><PackageCheck/><b>Conseil avant achat</b><small>Compatibilité vérifiée avec vous</small></span></div></div></section><section className="pdp-details"><div><small>POURQUOI LE CHOISIR ?</small><h2>Un produit pensé pour un <em>usage concret.</em></h2><div className="pdp-benefits">{content.benefits.map(item=><article key={item}><CheckCircle2/><span>{item}</span></article>)}</div></div><div className="pdp-use"><small>USAGES RECOMMANDÉS</small><h3>Ce produit peut vous convenir pour :</h3><ul>{content.uses.map(item=><li key={item}><CheckCircle2/>{item}</li>)}</ul><p>Pour un besoin professionnel ou une installation particulière, envoyez les détails de votre projet à l’équipe avant la commande.</p></div></section><section className="pdp-specs"><div><small>INFORMATIONS PRODUIT</small><h2>L’essentiel à connaître.</h2><p>Ces informations expliquent l’usage général du produit. Les caractéristiques précises du modèle disponible sont confirmées par Fantomas Tech avant l’achat.</p></div><div>{[["Produit",product.name],["Catégorie",product.category],["Disponibilité",product.availability],["Prix affiché",money(product.price)],...content.specs].map(([label,value])=><span key={label}><b>{label}</b><strong>{value}</strong></span>)}</div></section><section className="pdp-help"><div><small>UN DOUTE AVANT DE COMMANDER ?</small><h2>Vérifions ensemble que ce produit correspond à votre besoin.</h2></div><AddProductActions product={product}/></section><SiteFooter/></main>;
+}

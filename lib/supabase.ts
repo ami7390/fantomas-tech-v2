@@ -13,6 +13,14 @@ export async function getProducts(includeInactive=false){
  return response.json() as Promise<ProductRecord[]>;
 }
 
+export async function getProductBySlug(slug:string){
+ if(!url||!key)return null;
+ const response=await fetch(`${url}/rest/v1/products?slug=eq.${encodeURIComponent(slug)}&active=eq.true&select=*&limit=1`,{headers:baseHeaders,cache:"no-store"});
+ if(!response.ok)throw new Error("Produit indisponible");
+ const rows=await response.json() as ProductRecord[];
+ return rows[0]||null;
+}
+
 export async function signIn(email:string,password:string){
  const response=await fetch(`${url}/auth/v1/token?grant_type=password`,{method:"POST",headers:baseHeaders,body:JSON.stringify({email,password})});
  if(!response.ok)throw new Error("Identifiants incorrects ou compte non autorisé");
