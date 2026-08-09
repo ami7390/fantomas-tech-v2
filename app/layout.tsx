@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import "./mobile-product.css";
+import "./mobile-v35.css";
 import Tracking from "./components/Tracking";
 
 const inter = Inter({
