@@ -1,11 +1,14 @@
 "use client";
-import {useMemo,useState} from "react";
+import {useEffect,useMemo,useState} from "react";
+import Link from "next/link";
 import SiteHeader from "../components/SiteHeader";
 import SiteFooter from "../components/SiteFooter";
 import {ArrowRight,BarChart3,Plus,Search,SlidersHorizontal,Zap} from "lucide-react";
+import {getProducts} from "../../lib/supabase";
 
 const root="https://www.fantomas.tech";
-const products=[
+type ProductTuple=[string,string,string,number,string,string];
+const fallbackProducts:ProductTuple[]=[
  ["tripod-professional","TRIPOD PROFESSIONAL","PERCHE A SELFIE",10000,"/api/product-images/143","Disponible"],
  ["drone-m3-max","DRONE M3 MAX","Drones",28000,"/api/product-images/134","Disponible"],
  ["amplificateur-ecran-10-pouces","AMPLIFICATEUR 10\"","Électrique",4500,"/api/product-images/132","Disponible"],
@@ -53,24 +56,26 @@ const products=[
  ["mini-led-fill-light","LED FILL LIGHT","Éclairage",6000,"/api/product-images/54","Disponible"],
  ["mini-led-light","LED VIDEO LIGHT","Éclairage",5000,"/api/product-images/50","Stock limité"],
  ["disque-rotatif","DISQUE ROTATIF","Informatique",15000,"/api/product-images/46","Disponible"],
-] as const;
-const categories=["Tous",...Array.from(new Set(products.map(p=>p[2])))];
+];
 const money=(n:number)=>new Intl.NumberFormat("fr-FR").format(n)+" XOF";
 
 export default function Boutique(){
+ const [products,setProducts]=useState<ProductTuple[]>(fallbackProducts);
  const [category,setCategory]=useState("Tous"),[query,setQuery]=useState(""),[sort,setSort]=useState("featured"),[limit,setLimit]=useState(16);
  const [compareA,setCompareA]=useState("hy300-pro-4k"),[compareB,setCompareB]=useState("hy320-mini-4k");
  const [devices,setDevices]=useState<string[]>(["Télévision & box internet"]);
+ useEffect(()=>{getProducts().then(rows=>{if(rows.length)setProducts(rows.map(p=>[p.slug,p.name,p.category,p.price,p.image_url,p.availability]))}).catch(()=>{})},[]);
+ const categories=["Tous",...Array.from(new Set(products.map(p=>p[2])))];
  const shown=useMemo(()=>{let list=products.filter(p=>(category==="Tous"||p[2]===category)&&p[1].toLowerCase().includes(query.toLowerCase()));if(sort==="low")list=[...list].sort((a,b)=>a[3]-b[3]);if(sort==="high")list=[...list].sort((a,b)=>b[3]-a[3]);return list},[category,query,sort]);
  const compared=[products.find(p=>p[0]===compareA)!,products.find(p=>p[0]===compareB)!];
  const deviceOptions=["Réfrigérateur / congélateur","Télévision & box internet","Climatiseur 1 CV","Éclairage maison","Ordinateurs & bureau"];
  const energyWa="https://wa.me/22371000048?text="+encodeURIComponent(`Bonjour Fantomas Tech, je souhaite une étude énergie / anti-coupure pour : ${devices.join(", ")}. Merci de me proposer une configuration adaptée.`);
- const addToCart=(p:(typeof products)[number])=>{const key="fantomas-cart";const current=JSON.parse(localStorage.getItem(key)||"[]") as Array<{id:string;title:string;category:string;price:number;quantity:number;image:string}>;const found=current.find(item=>item.id===p[0]);const next=found?current.map(item=>item.id===p[0]?{...item,quantity:item.quantity+1}:item):[...current,{id:p[0],title:p[1],category:p[2],price:p[3],quantity:1,image:root+p[4]}];localStorage.setItem(key,JSON.stringify(next));window.dispatchEvent(new Event("fantomas-cart-updated"))};
+ const imageSrc=(src:string)=>src.startsWith("http")?src:root+src;
  return <main className="inner-page"><SiteHeader/><section className="shop-hero"><div><p className="kicker"><span/>CATALOGUE OFFICIEL</p><h1>La technologie utile.<br/><em>Disponible à Bamako.</em></h1><p>Explorez tout le catalogue Fantomas Tech, comparez les prix en XOF et commandez directement avec un conseiller.</p></div><div className="shop-stat"><strong>{products.length}</strong><span>produits référencés</span><small>Catalogue synchronisé avec Fantomas Tech</small></div></section>
  <section className="stock-alert"><div><span><Zap size={14}/> STOCK LIMITÉ À BAMAKO</span><h2>LED VIDEO LIGHT</h2><p>Ce produit est actuellement signalé en stock limité dans le catalogue Fantomas Tech.</p></div><div><strong>5 000 XOF</strong><a href="https://wa.me/22371000048?text=Bonjour%20Fantomas%20Tech%2C%20je%20souhaite%20confirmer%20la%20disponibilit%C3%A9%20du%20LED%20VIDEO%20LIGHT.">Confirmer la disponibilité <ArrowRight size={14}/></a></div></section>
  <section className="catalogue section"><div className="catalogue-toolbar"><label className="catalogue-search"><Search size={18}/><input value={query} onChange={e=>{setQuery(e.target.value);setLimit(16)}} placeholder="Rechercher dans la boutique…" aria-label="Rechercher dans la boutique"/></label><label className="sort-control"><SlidersHorizontal size={16}/><select value={sort} onChange={e=>setSort(e.target.value)} aria-label="Trier les produits"><option value="featured">Sélection Fantomas</option><option value="low">Prix croissant</option><option value="high">Prix décroissant</option></select></label></div>
  <div className="catalogue-filters" aria-label="Catégories">{categories.map(c=><button className={category===c?"active":""} onClick={()=>{setCategory(c);setLimit(16)}} key={c}>{c}</button>)}</div><div className="catalogue-count"><span>{shown.length} résultat{shown.length>1?"s":""}</span><i/> Stock local indiqué sur chaque produit</div>
- <div className="product-grid catalogue-grid">{shown.slice(0,limit).map((p,i)=><article className="product-card" style={{animationDelay:`${i*.025}s`}} key={p[0]}><div className="card-top"><span>{p[2]}</span><b className={p[5]==="Stock limité"?"limited":""}><i/> {p[5]}</b></div><div className="product-img catalogue-img"><img loading="lazy" src={root+p[4]} alt={p[1]}/></div><h3>{p[1]}</h3><p>Produit Fantomas Tech • Commande et disponibilité à confirmer</p><div className="product-foot"><strong>{money(p[3])}</strong><button onClick={()=>addToCart(p)} aria-label={`Ajouter ${p[1]} au panier`}><Plus size={18}/></button></div></article>)}</div>
+ <div className="product-grid catalogue-grid">{shown.slice(0,limit).map((p,i)=><article className="product-card" style={{animationDelay:`${i*.025}s`}} key={p[0]}><Link className="product-card-link" href={`/boutique/${p[0]}`} aria-label={`Voir les informations de ${p[1]}`}><div className="card-top"><span>{p[2]}</span><b className={p[5]==="Stock limité"?"limited":""}><i/> {p[5]}</b></div><div className="product-img catalogue-img"><img loading="lazy" src={imageSrc(p[4])} alt={p[1]}/></div><h3>{p[1]}</h3><p>Voir la description, les usages et les informations du produit.</p></Link><div className="product-foot"><strong>{money(p[3])}</strong><Link href={`/boutique/${p[0]}`} aria-label={`Découvrir ${p[1]}`}><Plus size={18}/></Link></div></article>)}</div>
  {limit<shown.length&&<button className="load-more" onClick={()=>setLimit(v=>v+16)}>Afficher plus de produits <ArrowRight size={15}/><span>{Math.min(16,shown.length-limit)} suivants</span></button>}{!shown.length&&<div className="no-results"><b>Aucun produit trouvé.</b><span>Essayez une autre catégorie ou demandez conseil sur WhatsApp.</span></div>}</section>
 
  <section className="shop-module compare-module"><div className="module-head"><span>◇</span><div><p className="kicker"><i/>COMPARATEUR</p><h2>Comparez avant de choisir.</h2><small>Prix, catégorie et disponibilité issus du catalogue actuel.</small></div></div><div className="compare-selects"><label>Produit 1<select value={compareA} onChange={e=>setCompareA(e.target.value)}>{products.map(p=><option value={p[0]} key={p[0]}>{p[1]}</option>)}</select></label><span>VS</span><label>Produit 2<select value={compareB} onChange={e=>setCompareB(e.target.value)}>{products.map(p=><option value={p[0]} key={p[0]}>{p[1]}</option>)}</select></label></div><div className="compare-table" role="table" aria-label="Comparaison de produits"><div className="compare-row compare-title"><b>Caractéristiques</b>{compared.map(p=><strong key={p[0]}>{p[1]}</strong>)}</div><div className="compare-row"><b>Prix affiché</b>{compared.map(p=><span className="orange" key={p[0]}>{money(p[3])}</span>)}</div><div className="compare-row"><b>Catégorie</b>{compared.map(p=><span key={p[0]}>{p[2]}</span>)}</div><div className="compare-row"><b>Disponibilité</b>{compared.map(p=><span className={p[5]==="Stock limité"?"yellow":"cyan"} key={p[0]}>{p[5]}</span>)}</div><div className="compare-row"><b>Conseil technique</b>{compared.map(p=><a href={`https://wa.me/22371000048?text=${encodeURIComponent(`Bonjour, je souhaite des précisions techniques sur ${p[1]}.`)}`} key={p[0]}>Demander la fiche →</a>)}</div></div></section>

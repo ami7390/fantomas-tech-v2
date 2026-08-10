@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Inter, JetBrains_Mono, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
+import "./mobile-product.css";
+import "./mobile-v35.css";
+import Tracking from "./components/Tracking";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -23,10 +26,6 @@ export const metadata: Metadata = {
   other: {
     "codex-preview": "development",
   },
-  icons: {
-    icon: "/favicon.svg",
-    shortcut: "/favicon.svg",
-  },
 };
 
 export default function RootLayout({
@@ -40,6 +39,7 @@ export default function RootLayout({
         className={`${inter.variable} ${mono.variable} ${jakarta.variable} antialiased`}
       >
         {children}
+        <Tracking/>
       </body>
     </html>
   );
