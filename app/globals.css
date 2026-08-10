@@ -101,7 +101,7 @@
 .hero.reveal{animation:none}
 @media(max-width:650px){
   .glass-header{padding:0 10px}
-  .head-actions{gap:5px}
+  .head-actions{margin-left:auto;gap:8px;justify-content:flex-end}
   .cart-pill{display:flex;width:42px;padding:0;justify-content:center;position:relative}
   .cart-pill>span{display:none}
   .cart-pill>b{position:absolute;right:-3px;top:-5px;min-width:18px;height:18px;padding:0 4px;display:grid;place-items:center;margin:0}
