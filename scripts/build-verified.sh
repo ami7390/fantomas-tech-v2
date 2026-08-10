@@ -7,6 +7,19 @@ if [[ "${SITES_ENV_READY:-}" != "1" ]]; then
   exec bash "${script_dir}/sites-env.sh" -- bash "$0" "$@"
 fi
 
+# Vercel expects the native Next.js output in .next. The Sites deployment uses
+# Vinext and expects its Worker artifact in dist, so select the builder from the
+# hosting environment instead of producing the wrong output format.
+if [[ "${VERCEL:-}" == "1" ]]; then
+  next_bin="${SITES_PROJECT_ROOT}/node_modules/.bin/next"
+  if [[ ! -x "${next_bin}" ]]; then
+    echo "Next.js is unavailable. Install dependencies before building." >&2
+    exit 69
+  fi
+  echo "Running native Next.js build for Vercel..."
+  exec "${next_bin}" build
+fi
+
 command -v timeout >/dev/null || {
   echo "build-verified.sh requires GNU timeout." >&2
   exit 69
