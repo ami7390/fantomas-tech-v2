@@ -32,7 +32,7 @@ export default function SiteHeader({cartCount=0}:{cartCount?:number}){
     <header className="glass-header">
       <Link className="brand" href="/"><img className="brand-logo" src="/assets/fantomas-original/logo.png" alt="Logo Fantomas Tech"/><span>FANTOMAS<small>TECH</small></span></Link>
       <nav aria-label="Navigation principale" className={menu?"nav open":"nav"}>
-        <Link href="/">Accueil</Link><Link href="/boutique">Boutique</Link><Link href="/maison-connectee">Maison connectée</Link><Link href="/energie">Énergie</Link><Link href="/conseils">Conseils</Link><Link href="/contact">Contact</Link><Link className="nav-new" href="/pack-builder">Simulateur <b>NEW</b></Link>
+        <Link href="/">Accueil</Link><Link href="/boutique">Boutique</Link><Link href="/maison-connectee">Maison connectée</Link><Link href="/energie">Énergie</Link><Link href="/conseils">Conseils</Link><Link className="nav-new" href="/pack-builder">Simulateur <b>NEW</b></Link>
       </nav>
       <div className="head-actions">
         <button className="quick-search search-trigger" onClick={()=>setSearch(true)} aria-label="Ouvrir la recherche rapide"><Search size={15}/><span>Rechercher</span><kbd>⌘K</kbd></button>
