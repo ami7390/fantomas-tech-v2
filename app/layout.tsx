@@ -1,3 +1,4 @@
+
 import type { Metadata } from "next";
 import Script from "next/script";
 import { Inter, JetBrains_Mono, Plus_Jakarta_Sans } from "next/font/google";
@@ -41,6 +42,22 @@ export default function RootLayout({
         className={`${inter.variable} ${mono.variable} ${jakarta.variable} antialiased`}
       >
         {children}
+
+        {/* Google Analytics 4 — Fantomas */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-EKGQF8RFT7"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-EKGQF8RFT7');
+          `}
+        </Script>
+
+        {/* Microsoft Clarity — Fantomas */}
         <Script id="microsoft-clarity" strategy="afterInteractive">
           {`(function(c,l,a,r,i,t,y){
             c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
